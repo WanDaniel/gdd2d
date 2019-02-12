@@ -157,7 +157,7 @@ public class FollowerBehaviour : MonoBehaviour {
 
     void Frustrate()
     {
-        print("Frustration iteration number " + frustrationStage);
+        //print("Frustration iteration number " + frustrationStage);
 
         furious = false;
 
@@ -209,7 +209,7 @@ public class FollowerBehaviour : MonoBehaviour {
         if (hitGround)
         {
             floatTarget = topPos.transform.position;
-            print("Moving to defaultPos.");
+            //print("Moving to defaultPos.");
             transform.position = Vector3.SmoothDamp(transform.position, floatTarget + (Vector3.up * 1.5f), ref velocity, floatSpeed);
         }
         else
@@ -218,21 +218,21 @@ public class FollowerBehaviour : MonoBehaviour {
                 transform.parent.position.x + Random.Range(-1.5f, 1.5f),
                 transform.parent.position.y - 1.5f,
                 transform.parent.position.z + Random.Range(-1.5f, 1.5f));
-            print("Moving to groundPos.");
+            //print("Moving to groundPos.");
             transform.position = Vector3.SmoothDamp(transform.position, floatTarget, ref velocity, floatSpeed);
         }
 
         //Change direction
         if (transform.position.y <= transform.parent.position.y)
         {
-            print("Hit ground.");
+            //print("Hit ground.");
             if (!hitGround)
                 Squeak();
             hitGround = true;
         }
         else if (transform.position.y >= topPos.position.y)
         {
-            print("Hit height.");
+            //print("Hit height.");
             hitGround = false;
         }
     }

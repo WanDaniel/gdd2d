@@ -125,26 +125,38 @@ public class PlayerController : MonoBehaviour {
 
         #region Determine direction
         if (velocityForward == 1 && velocityRight == 1)
-            moveDirection = forward + right;
+            moveDirection = -forward - right;
         else if (velocityForward == 1 && velocityRight == 0)
-            moveDirection = forward;
+            moveDirection = -forward;
         else if (velocityForward == 1 && velocityRight == -1)
-            moveDirection = forward - right;
+            moveDirection = -forward + right;
         else if (velocityForward == 0 && velocityRight == 1)
-            moveDirection = right;
+            moveDirection = -right;
         //No case for forward==0 && right==0 because this should stop without rotating
         else if (velocityForward == 0 && velocityRight == -1)
-            moveDirection = -right;
+            moveDirection = right;
         else if (velocityForward == -1 && velocityRight == 1)
-            moveDirection = -forward + right;
+            moveDirection = forward - right;
         else if (velocityForward == -1 && velocityRight == 0)
-            moveDirection = -forward;
+            moveDirection = forward;
         else if (velocityForward == -1 && velocityRight == -1)
-            moveDirection = -forward - right;
+            moveDirection = forward + right;
         else if (velocityForward != 0 && velocityRight != 0)
             print("ERROR in PlayerController.cs: Rotation values are unreachable.  Vertical value " + velocityForward + ".  Horizontal value " + velocityRight);
         #endregion
 
         transform.LookAt(transform.position - moveDirection);
+    }
+
+    void OnTriggerEnter(Collider other)
+    {
+        if (other.GetComponent<PressurePlate>())
+            other.GetComponent<PressurePlate>().Activate();
+    }
+
+    void OnTriggerExit(Collider other)
+    {
+        if (other.GetComponent<PressurePlate>())
+            other.GetComponent<PressurePlate>().ResetPlate();
     }
 }
