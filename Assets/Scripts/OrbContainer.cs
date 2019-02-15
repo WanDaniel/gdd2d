@@ -78,8 +78,10 @@ public class OrbContainer : MonoBehaviour {
         {
             //Force bricks away from orb
             Rigidbody rb = partsToDestroy[i].GetComponent<Rigidbody>();
+            rb.useGravity = true;
+            rb.isKinematic = false;
             Vector3 direction = partsToDestroy[i].transform.position - orb.transform.position;
-            rb.AddForce(direction*5, ForceMode.Impulse);
+            rb.AddForce(direction * 5, ForceMode.Impulse);
         }
     }
 

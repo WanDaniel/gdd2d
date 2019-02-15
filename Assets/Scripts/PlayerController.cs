@@ -10,7 +10,8 @@ public class PlayerController : MonoBehaviour {
     /// <summary>
     /// Player movement speed.
     /// </summary>
-    public float speed = 6.0f;
+    public float defaultSpeed;
+    private float speed;
     /// <summary>
     /// Player jump force.
     /// </summary>
@@ -40,6 +41,8 @@ public class PlayerController : MonoBehaviour {
     /// Right direction of the camera.
     /// </summary>
     private Vector3 right = Vector3.zero;
+
+    bool plateActivated;
     #endregion
 
     void Awake()
@@ -54,109 +57,185 @@ public class PlayerController : MonoBehaviour {
         }
     }
 
-    void Update()
+    void FixedUpdate()
     {
         Movement();
-        Orientation();
+
+        if (!Input.GetKey(KeyCode.LeftAlt))
+            Orientation();
     }
 
     void Movement()
     {
-        if (Input.GetKey(KeyCode.W) || Input.GetKey(KeyCode.UpArrow))
+        float inputHoriz = Input.GetAxis("Horizontal");
+        float inputVert = Input.GetAxis("Vertical");
+
+        if (inputHoriz != 0 || inputVert != 0)
         {
-            transform.position += Camera.main.transform.forward * speed * Time.deltaTime;
+            if (Math.Abs(inputHoriz) > Math.Abs(inputVert)) //Check if absolute value of horiz input is greater than that of vert
+                speed = Math.Abs(defaultSpeed * Math.Abs(inputHoriz) - (defaultSpeed * .35f)); //Set speed based on horiz input and reduce due to strafing
+            else if (inputVert < 0)
+                speed = Math.Abs(defaultSpeed * Math.Abs(inputVert) - (defaultSpeed * .35f)); //Set speed based on vert input and reduce due to backwards direction
+            else
+                speed = Math.Abs(defaultSpeed * Math.Abs(inputVert)); //Set speed based on vert input
         }
-        if (Input.GetKey(KeyCode.A) || Input.GetKey(KeyCode.LeftArrow))
-        {
-            transform.position += -Camera.main.transform.right * speed * Time.deltaTime;
-        }
-        if (Input.GetKey(KeyCode.S) || Input.GetKey(KeyCode.DownArrow))
-        {
-            transform.position += -Camera.main.transform.forward * speed * Time.deltaTime;
-        }
-        if (Input.GetKey(KeyCode.D) || Input.GetKey(KeyCode.RightArrow))
-        {
-            transform.position += Camera.main.transform.right * speed * Time.deltaTime;
-        }
+
+        #region Physical movement
+        Vector3 velocity;
+
+        if (Input.GetKey(KeyCode.LeftAlt))
+            velocity = transform.position + ((inputVert * transform.forward) + (inputHoriz * transform.right)) * speed * Time.deltaTime; //Move based on character rotation
+        else
+            velocity = transform.position + ((inputVert * Camera.main.transform.forward) + (inputHoriz * Camera.main.transform.right)) * speed * Time.deltaTime; //Move based on camera rotation
+
+        rb.MovePosition(velocity);
+
         if (Input.GetKeyDown(KeyCode.Space))
         {
             rb.velocity += jumpSpeed * Vector3.up;
         }
+        #endregion
+
+        #region Discrete movement
+        //if (Input.GetKey(KeyCode.W) || Input.GetKey(KeyCode.UpArrow))
+        //{
+        //    transform.position += Camera.main.transform.forward * speed * Time.deltaTime;
+        //}
+        //if (Input.GetKey(KeyCode.A) || Input.GetKey(KeyCode.LeftArrow))
+        //{
+        //    transform.position += -Camera.main.transform.right * speed * Time.deltaTime;
+        //}
+        //if (Input.GetKey(KeyCode.S) || Input.GetKey(KeyCode.DownArrow))
+        //{
+        //    transform.position += -Camera.main.transform.forward * speed * Time.deltaTime;
+        //}
+        //if (Input.GetKey(KeyCode.D) || Input.GetKey(KeyCode.RightArrow))
+        //{
+        //    transform.position += Camera.main.transform.right * speed * Time.deltaTime;
+        //}
+        //if (Input.GetKeyDown(KeyCode.Space))
+        //{
+        //    rb.velocity += jumpSpeed * Vector3.up;
+        //}
+        #endregion
     }
 
     void Orientation()
     {
-        forward = new Vector3(Camera.main.transform.forward.x, 0, Camera.main.transform.forward.z);
-        right = new Vector3(Camera.main.transform.right.x, 0, Camera.main.transform.right.z);
+        Quaternion characterRotation = Camera.main.transform.rotation;
+        characterRotation.x = 0;
+        characterRotation.z = 0;
 
-        #region Read vertical input
-        if (Input.GetKey(KeyCode.W) || Input.GetKey(KeyCode.UpArrow))
-        {
-            velocityForward = 1;
-            moveDirection += forward;
-        }
-        else if (Input.GetKey(KeyCode.S) || Input.GetKey(KeyCode.DownArrow))
-        {
-            velocityForward = -1;
-            moveDirection += -forward;
-        }
-        else
-        {
-            velocityForward = 0;
-        }
-        #endregion
-
-        #region Read horizontal input
-        if (Input.GetKey(KeyCode.D) || Input.GetKey(KeyCode.RightArrow))
-        {
-            velocityRight = 1;
-            moveDirection += right;
-        }
-        else if (Input.GetKey(KeyCode.A) || Input.GetKey(KeyCode.LeftArrow))
-        {
-            velocityRight = -1;
-            moveDirection += -right;
-        }
-        else
-        {
-            velocityRight = 0;
-        }
-        #endregion
-
-        #region Determine direction
-        if (velocityForward == 1 && velocityRight == 1)
-            moveDirection = -forward - right;
-        else if (velocityForward == 1 && velocityRight == 0)
-            moveDirection = -forward;
-        else if (velocityForward == 1 && velocityRight == -1)
-            moveDirection = -forward + right;
-        else if (velocityForward == 0 && velocityRight == 1)
-            moveDirection = -right;
-        //No case for forward==0 && right==0 because this should stop without rotating
-        else if (velocityForward == 0 && velocityRight == -1)
-            moveDirection = right;
-        else if (velocityForward == -1 && velocityRight == 1)
-            moveDirection = forward - right;
-        else if (velocityForward == -1 && velocityRight == 0)
-            moveDirection = forward;
-        else if (velocityForward == -1 && velocityRight == -1)
-            moveDirection = forward + right;
-        else if (velocityForward != 0 && velocityRight != 0)
-            print("ERROR in PlayerController.cs: Rotation values are unreachable.  Vertical value " + velocityForward + ".  Horizontal value " + velocityRight);
-        #endregion
-
-        transform.LookAt(transform.position - moveDirection);
+        transform.rotation = Quaternion.Lerp(transform.rotation, characterRotation, 10 * Time.deltaTime);
     }
+
+    //void Orientation()
+    //{
+    //    forward = new Vector3(0, Camera.main.transform.forward.y, 0);
+    //    right = new Vector3(0, Camera.main.transform.right.y, 0);
+
+    //    //forward = new Vector3(Camera.main.transform.forward.x, 0, Camera.main.transform.forward.z);
+    //    //right = new Vector3(Camera.main.transform.right.x, 0, Camera.main.transform.right.z);
+
+    //    forward += transform.forward;
+    //    right += transform.right;
+
+    //    #region Read vertical input
+    //    if (Input.GetKey(KeyCode.W) || Input.GetKey(KeyCode.UpArrow))
+    //    {
+    //        velocityForward = 1;
+    //        moveDirection += forward;
+    //    }
+    //    else if (Input.GetKey(KeyCode.S) || Input.GetKey(KeyCode.DownArrow))
+    //    {
+    //        velocityForward = -1;
+    //        moveDirection += -forward;
+    //    }
+    //    else
+    //    {
+    //        velocityForward = 0;
+    //    }
+    //    #endregion
+
+    //    #region Read horizontal input
+    //    if (Input.GetKey(KeyCode.D) || Input.GetKey(KeyCode.RightArrow))
+    //    {
+    //        velocityRight = 1;
+    //        moveDirection += right;
+    //    }
+    //    else if (Input.GetKey(KeyCode.A) || Input.GetKey(KeyCode.LeftArrow))
+    //    {
+    //        velocityRight = -1;
+    //        moveDirection += -right;
+    //    }
+    //    else
+    //    {
+    //        velocityRight = 0;
+    //    }
+    //    #endregion
+
+    //    #region Determine direction (Physical)
+    //    if (velocityForward == 1 && velocityRight == 1)
+    //        rb.rotation = Quaternion.Euler(-forward - right);
+    //    else if (velocityForward == 1 && velocityRight == 0)
+    //        rb.rotation = Quaternion.Euler(-forward);
+    //    else if (velocityForward == 1 && velocityRight == -1)
+    //        rb.rotation = Quaternion.Euler(-forward + right);
+    //    else if (velocityForward == 0 && velocityRight == 1)
+    //        rb.rotation = Quaternion.Euler(-right);
+    //    //No case for forward==0 && right==0 because this should stop without rotating
+    //    else if (velocityForward == 0 && velocityRight == -1)
+    //        rb.rotation = Quaternion.Euler(right);
+    //    else if (velocityForward == -1 && velocityRight == 1)
+    //        rb.rotation = Quaternion.Euler(forward - right);
+    //    else if (velocityForward == -1 && velocityRight == 0)
+    //        rb.rotation = Quaternion.Euler(forward);
+    //    else if (velocityForward == -1 && velocityRight == -1)
+    //        rb.rotation = Quaternion.Euler(forward + right);
+    //    else if (velocityForward != 0 && velocityRight != 0)
+    //        print("ERROR in PlayerController.cs: Rotation values are unreachable.  Vertical value " + velocityForward + ".  Horizontal value " + velocityRight);
+    //    #endregion
+
+    //    #region Determine direction (Discrete)
+    //    //if (velocityForward == 1 && velocityRight == 1)
+    //    //    moveDirection = -forward - right;
+    //    //else if (velocityForward == 1 && velocityRight == 0)
+    //    //    moveDirection = -forward;
+    //    //else if (velocityForward == 1 && velocityRight == -1)
+    //    //    moveDirection = -forward + right;
+    //    //else if (velocityForward == 0 && velocityRight == 1)
+    //    //    moveDirection = -right;
+    //    ////No case for forward==0 && right==0 because this should stop without rotating
+    //    //else if (velocityForward == 0 && velocityRight == -1)
+    //    //    moveDirection = right;
+    //    //else if (velocityForward == -1 && velocityRight == 1)
+    //    //    moveDirection = forward - right;
+    //    //else if (velocityForward == -1 && velocityRight == 0)
+    //    //    moveDirection = forward;
+    //    //else if (velocityForward == -1 && velocityRight == -1)
+    //    //    moveDirection = forward + right;
+    //    //else if (velocityForward != 0 && velocityRight != 0)
+    //    //    print("ERROR in PlayerController.cs: Rotation values are unreachable.  Vertical value " + velocityForward + ".  Horizontal value " + velocityRight);
+    //    #endregion
+
+    //    //transform.LookAt(transform.position - moveDirection);
+    //}
 
     void OnTriggerEnter(Collider other)
     {
-        if (other.GetComponent<PressurePlate>())
+        if (other.GetComponent<PressurePlate>() && !plateActivated)
+        {
             other.GetComponent<PressurePlate>().Activate();
+            plateActivated = true;
+        }
     }
 
     void OnTriggerExit(Collider other)
     {
         if (other.GetComponent<PressurePlate>())
+        {
             other.GetComponent<PressurePlate>().ResetPlate();
+            plateActivated = false;
+        }
     }
 }

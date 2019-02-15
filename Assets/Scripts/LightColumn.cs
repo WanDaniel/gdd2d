@@ -49,6 +49,11 @@ public class LightColumn : TriggerObject
         if (lastInPath)
         {
             transform.LookAt(orbContainer.transform);
+            Quaternion rotation = transform.rotation;
+            rotation.x = 0;
+            rotation.z = 0;
+            transform.rotation = rotation;
+
             transform.Rotate(new Vector3(0, 180, 0)); //Offset that may need to be changed after art assets are integrated
             lightTarget.transform.position = orbContainer.transform.position;
         }
