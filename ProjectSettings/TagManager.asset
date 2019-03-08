@@ -5,6 +5,7 @@ TagManager:
   serializedVersion: 2
   tags:
   - CameraOccluder
+  - OrbDrop
   layers:
   - Default
   - TransparentFX

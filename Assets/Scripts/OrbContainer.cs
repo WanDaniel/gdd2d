@@ -73,6 +73,7 @@ public class OrbContainer : MonoBehaviour {
         print("Crumbling");
 
         orbRevealed = true;
+        orb.GetComponent<Orb>().AllowCollection();
 
         for (int i = 0; i < partsToDestroy.Length; i++)
         {

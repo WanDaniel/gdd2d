@@ -5,7 +5,7 @@ using System;
 
 public class LightColumn : TriggerObject
 {
-
+    #region Variables
     [SerializeField]
     private Transform lightEmitter;
     [SerializeField]
@@ -21,18 +21,31 @@ public class LightColumn : TriggerObject
     [SerializeField]
     private int pathIndex;
 
+    /// <summary>
+    /// The different colours applied to light beams.
+    /// </summary>
+    [Tooltip("The different colours applied to light beams.")]
     public Material[] colors;
+
+    /// <summary>
+    /// Columns that this should look at when the pressure plate is activated.
+    /// </summary>
+    [Tooltip("Columns that this should look at when the pressure plate is activated.")]
+    public LightColumn[] possibleTargets;
+    private int columnTarget = 0;
 
     private bool casting;
 
     private LineRenderer lineRend;
     
     private LightColumn activeTarget;
+    #endregion
 
     void Awake()
     {
         lineRend = GetComponent<LineRenderer>();
         lineRend.SetPosition(0, lightEmitter.position);
+        lineRend.useWorldSpace = true;
 
         try
         {
@@ -56,6 +69,11 @@ public class LightColumn : TriggerObject
 
             transform.Rotate(new Vector3(0, 180, 0)); //Offset that may need to be changed after art assets are integrated
             lightTarget.transform.position = orbContainer.transform.position;
+        }
+        else
+        {
+            transform.LookAt(possibleTargets[columnTarget].transform);
+            transform.Rotate(new Vector3(0, 180, 0));
         }
     }
 
@@ -87,8 +105,15 @@ public class LightColumn : TriggerObject
             activeTarget = null; //Reset so later movements don't disrupt puzzle
         }
 
-        transform.Rotate(new Vector3(transform.rotation.x, 45, transform.rotation.z)); //Rotate 45 degrees
-        
+        columnTarget++;
+
+        if (columnTarget == possibleTargets.Length)
+            columnTarget = 0;            
+
+        transform.LookAt(possibleTargets[columnTarget].transform);
+        transform.Rotate(new Vector3(0, 180, 0));
+        //transform.Rotate(new Vector3(transform.rotation.x, 45, transform.rotation.z)); //Rotate 45 degrees
+
         //transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.Euler(0, transform.rotation.eulerAngles.y + 45, 0), Time.deltaTime * 10);
     }
 

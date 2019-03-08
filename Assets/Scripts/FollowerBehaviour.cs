@@ -1,11 +1,17 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using System;
 
 public class FollowerBehaviour : MonoBehaviour {
 
     #region Variables
     AudioManager audioManager;
+
+    private bool helping = false;
+    private Orb orbHelpTarget;
+
+    private Rigidbody rigidbody;
 
     #region Floating
     /// <summary>
@@ -91,6 +97,15 @@ public class FollowerBehaviour : MonoBehaviour {
             floatTarget = new Vector3(UnityEngine.Random.Range(-floatDistance, floatDistance), UnityEngine.Random.Range(-floatDistance, floatDistance), UnityEngine.Random.Range(-floatDistance, floatDistance)) + defaultPos.position;
         }
 
+        try
+        {
+            rigidbody = GetComponent<Rigidbody>(); //Attempt to initialise rigidbody
+        }
+        catch (MissingComponentException)
+        {
+            print("ERROR in FolowerBehaviour.cs: No RigidBody component exists on the follower object.  Please verify that the prefab and in-game instance have Rigidbodies.");
+        }
+
         //Initialisation if given values are unusable
         if (floatSpeed == 0)
             floatSpeed = 3;
@@ -107,9 +122,16 @@ public class FollowerBehaviour : MonoBehaviour {
 
     void Update()
     {
-        CheckFrustrate();
-        if (!furious)
-            Float();
+        if (!helping)
+        {
+            CheckFrustrate();
+
+            if (!furious)
+                Float();
+        }
+
+        if (helping && orbHelpTarget)
+            KnockOrb();
     }
 
     void Float()
@@ -122,9 +144,9 @@ public class FollowerBehaviour : MonoBehaviour {
         {
             //Generate a random position nearby
             floatTarget = new Vector3(
-                Random.Range(-floatDistance, floatDistance),
-                Random.Range(Mathf.Clamp(-floatDistance, transform.parent.position.y, Mathf.Infinity), floatDistance),
-                Random.Range(-floatDistance, floatDistance)) + defaultPos.position;
+                UnityEngine.Random.Range(-floatDistance, floatDistance),
+                UnityEngine.Random.Range(Mathf.Clamp(-floatDistance, transform.parent.position.y, Mathf.Infinity), floatDistance),
+                UnityEngine.Random.Range(-floatDistance, floatDistance)) + defaultPos.position;
         }
 
         //Float to it
@@ -138,6 +160,7 @@ public class FollowerBehaviour : MonoBehaviour {
             frustrationTimer = frustrationIntervals; //Reset frustration
             frustrationStage = 0;
             Frustrate();
+            rigidbody.velocity = Vector3.zero;
         }
         else
             frustrationTimer -= Time.deltaTime;
@@ -215,9 +238,9 @@ public class FollowerBehaviour : MonoBehaviour {
         else
         {
             floatTarget = new Vector3(
-                transform.parent.position.x + Random.Range(-1.5f, 1.5f),
+                transform.parent.position.x + UnityEngine.Random.Range(-1.5f, 1.5f),
                 transform.parent.position.y - 1.5f,
-                transform.parent.position.z + Random.Range(-1.5f, 1.5f));
+                transform.parent.position.z + UnityEngine.Random.Range(-1.5f, 1.5f));
             //print("Moving to groundPos.");
             transform.position = Vector3.SmoothDamp(transform.position, floatTarget, ref velocity, floatSpeed);
         }
@@ -240,5 +263,28 @@ public class FollowerBehaviour : MonoBehaviour {
     void Squeak()
     {
         audioManager.Squeak();
+    }
+
+    void KnockOrb()
+    {
+        transform.position = Vector3.MoveTowards(transform.position, orbHelpTarget.transform.position, 5 * Time.deltaTime);
+    }
+
+    void OnCollisionEnter(Collision other)
+    {
+        if (other.transform.GetComponent<Orb>())
+        {
+            helping = false;
+            orbHelpTarget.AllowCollection();
+        }
+    }
+
+    void OnTriggerEnter(Collider other)
+    {
+        if (other.GetComponent<OrbDrop>())
+        {
+            orbHelpTarget = other.GetComponent<OrbDrop>().orb;
+            helping = true;
+        }
     }
 }
