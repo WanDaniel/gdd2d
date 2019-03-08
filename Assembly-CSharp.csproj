@@ -62,17 +62,22 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Assets\Scripts\AudioManager.cs" />
+    <Compile Include="Assets\Scripts\Boat.cs" />
     <Compile Include="Assets\Scripts\CameraOrbit.cs" />
     <Compile Include="Assets\Scripts\FaceCamera.cs" />
     <Compile Include="Assets\Scripts\Follower.cs" />
     <Compile Include="Assets\Scripts\FollowerBehaviour.cs" />
     <Compile Include="Assets\Scripts\LightColumn.cs" />
+    <Compile Include="Assets\Scripts\MainMenu.cs" />
     <Compile Include="Assets\Scripts\MovableObject.cs" />
     <Compile Include="Assets\Scripts\MovableObjectTrigger.cs" />
     <Compile Include="Assets\Scripts\OrbContainer.cs" />
     <Compile Include="Assets\Scripts\PlayerController.cs" />
     <Compile Include="Assets\Scripts\PressurePlate.cs" />
     <Compile Include="Assets\Scripts\TriggerObject.cs" />
+    <Compile Include="Assets\Water (Basic)\Scripts\WaterBasic.cs" />
+    <None Include="Assets\Water (Basic)\DO_NOT_WORK_IN_VR.txt" />
+    <None Include="Assets\Water (Basic)\Shaders\FXWaterBasic.shader" />
     <Reference Include="Unity.TextMeshPro.Editor">
       <HintPath>M:/StuHome/HomeDrive9$/1803889/!Stuff I actually use/!Semester 2/DES502/GDD2D Game/Library/ScriptAssemblies/Unity.TextMeshPro.Editor.dll</HintPath>
     </Reference>
