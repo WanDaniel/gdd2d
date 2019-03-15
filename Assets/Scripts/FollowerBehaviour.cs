@@ -71,8 +71,8 @@ public class FollowerBehaviour : MonoBehaviour {
     /// <summary>
     /// Material used during frustration fluctuation.
     /// </summary>
-    [SerializeField]
-    Material[] materials;
+    //[SerializeField]
+    //Material[] materials;
     /// <summary>
     /// Used in HitThings() to determine when the character should ascend or descend.
     /// </summary>
@@ -115,9 +115,9 @@ public class FollowerBehaviour : MonoBehaviour {
             frustrationIntervals = 5;
         frustrationTimer = frustrationIntervals;
 
-        GetComponent<MeshRenderer>().material = materials[0];
-        particles = particleSys.main;
-        particles.startColor = materials[0].color;
+        //GetComponent<MeshRenderer>().material = materials[0];
+        //particles = particleSys.main;
+        //particles.startColor = materials[0].color;
     }
 
     void Update()
@@ -184,8 +184,8 @@ public class FollowerBehaviour : MonoBehaviour {
 
         furious = false;
 
-        GetComponent<MeshRenderer>().material = materials[frustrationStage];
-        particles.startColor = materials[frustrationStage].color;
+        //GetComponent<MeshRenderer>().material = materials[frustrationStage];
+        //particles.startColor = materials[frustrationStage].color;
 
         switch (frustrationStage)
         {

@@ -13,8 +13,8 @@ public class Boat : MonoBehaviour
         if (rotationSpeed <= 0)
             rotationSpeed = 1.5f;
 
-        rotationA = Quaternion.Euler(-3, -20, -2);
-        rotationB = Quaternion.Euler(2.5f, -20, 1.25f);
+        rotationA = Quaternion.Euler(4, -120, -1.5f);
+        rotationB = Quaternion.Euler(-4, -120, 1.5f);
     }
 
     void Update()
